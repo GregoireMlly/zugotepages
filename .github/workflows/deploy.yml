@@ -50,7 +50,7 @@ jobs:
         with:
           # Upload entire repository
           path: './dist'
-          name: 'github-pages-${{ github.run_id }}'
+          name: 'github-pages'
 
       - name: Deploy to GitHub Pages
         id: deployment
