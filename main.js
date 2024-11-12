@@ -15,7 +15,8 @@ import {
   MeshPhongMaterial,
   PerspectiveCamera,
   Scene,
-  WebGLRenderer
+  WebGLRenderer,
+  Vector3
 } from 'three';
 
 // XR Emulator
@@ -108,9 +109,8 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 var nb_sperm = 15;
-
+var spermSpeed = 0.05;
 var spermArr =[];
-
 
 
 const clock = new Clock();
@@ -122,7 +122,12 @@ const animate = () => {
   const elapsed = clock.getElapsedTime();
   
   // can be used in shaders: uniforms.u_time.value = elapsed;
-
+  for (let i = 0; i < spermArr.length; i++) {
+    const direction = new Vector3().subVectors(new Vector3(0, 0, 0), spermArr[i].position);
+    direction.normalize();  
+    direction.multiplyScalar(spermSpeed * delta);
+    spermArr[i].position.add(direction);
+  }
   renderer.render(scene, camera);
 };
 
@@ -173,7 +178,10 @@ const init = () => {
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
+
+  //add sperm random position
   for (let i = 0; i <nb_sperm ; i++) {
+
     var sideZ= getRndInteger(-1,1);
     var sideX = getRndInteger(-1,1);
     var sperm = new Mesh(geometryCone, materialCone);
@@ -181,6 +189,7 @@ const init = () => {
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     scene.add(sperm);
     spermArr.push(sperm);
+
   }
   window.addEventListener('resize', onWindowResize, false);
 }
