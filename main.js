@@ -44,13 +44,20 @@ import { XRButton } from 'three/addons/webxr/XRButton.js';
 // See vite.config.js
 // 
 // Consider using alternatives like Oimo or cannon-es
-import {
-  OrbitControls
-} from 'three/addons/controls/OrbitControls.js';
 
+import {
+  OrbitControls,
+
+} from 'three/addons/controls/OrbitControls.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
+import { getRndInteger, updateScore } from './utils';
+import { checkCollision } from './utils';
+import { winOrNot } from './utils';
+import { rotateObject,moveSperm } from './movement';
 
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/js/r148/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
@@ -97,6 +104,14 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
+const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
+
+const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+var nb_sperm = 15;
+
+var spermArr =[];
+
+
 
 const clock = new Clock();
 
@@ -105,7 +120,7 @@ const animate = () => {
 
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
-
+  
   // can be used in shaders: uniforms.u_time.value = elapsed;
 
   renderer.render(scene, camera);
@@ -133,12 +148,8 @@ const init = () => {
   renderer.xr.enabled = true;
   document.body.appendChild(renderer.domElement);
 
-  /*
-  document.body.appendChild( XRButton.createButton( renderer, {
-    'optionalFeatures': [ 'depth-sensing' ],
-    'depthSensing': { 'usagePreference': [ 'gpu-optimized' ], 'dataFormatPreference': [] }
-  } ) );
-*/
+  
+  
 
   const xrButton = XRButton.createButton(renderer, {});
   xrButton.style.backgroundColor = 'skyblue';
@@ -148,30 +159,32 @@ const init = () => {
   //controls.listenToKeyEvents(window); // optional
   controls.target.set(0, 1.6, 0);
   controls.update();
-
-  // Handle input: see THREE.js webxr_ar_cones
-
-  const geometry = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
-
+  // Handle input: see THREE.js webxr_ar_sperms
+//y = hauteur
+//z = profonderu
+//x = horizontal
   const onSelect = (event) => {
 
-    const material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
-    const mesh = new Mesh(geometry, material);
-    mesh.position.set(0, 0, - 0.3).applyMatrix4(controller.matrixWorld);
-    mesh.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    scene.add(mesh);
+    //sperm.position.set(0, 0, -0.3).applyMatrix4(controller.matrixWorld);
+    //sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
+    //scene.add(sperm);
 
   }
-
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
-
-
+  for (let i = 0; i <nb_sperm ; i++) {
+    var sideZ= getRndInteger(-1,1);
+    var sideX = getRndInteger(-1,1);
+    var sperm = new Mesh(geometryCone, materialCone);
+    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
+    sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
+    scene.add(sperm);
+    spermArr.push(sperm);
+  }
   window.addEventListener('resize', onWindowResize, false);
-
 }
-
+ 
 init();
 
 //
