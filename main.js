@@ -124,8 +124,8 @@ const animate = () => {
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
     const direction = new Vector3().subVectors(new Vector3(0, 0, 0), spermArr[i].position);
-    direction.normalize();  
-    direction.multiplyScalar(spermSpeed * delta);
+    //direction.normalize();  
+    //direction.multiplyScalar(spermSpeed * delta);
     spermArr[i].position.add(direction);
   }
   renderer.render(scene, camera);
