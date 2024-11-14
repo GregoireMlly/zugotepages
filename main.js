@@ -106,6 +106,9 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
+const center_position =new Vector3(0,1.6,0);
+
+
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
@@ -131,6 +134,7 @@ function spermGenerate(sperm){
     sperm.scale.set(0.01,0.01,0.01);
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
+    sperm.lookAt(center_position);
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
@@ -171,7 +175,7 @@ const animate = () => {
   
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
-    const direction = new Vector3().subVectors(new Vector3(0, 0, 0), spermArr[i].position);
+    const direction = new Vector3().subVectors(center_position, spermArr[i].position);
     direction.normalize();  
     direction.multiplyScalar(spermSpeed * delta);
     spermArr[i].position.add(direction);
@@ -228,13 +232,13 @@ const init = () => {
   scene.add(controller);
   var spermtest = new Mesh(geometryCone, materialCone);
   spermtest.position.set(0,0, -2).applyMatrix4(controller.matrixWorld);
-  spermtest.lookAt(0,0,0);
+  spermtest.lookAt(center_position);
   //spermtest.quaternion.setFromRotationMatrix(controller.matrixWorld);
   spermArr.push(spermtest);
   scene.add(spermtest);
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
-  ovule.position.set(0,0,0);
+  ovule.position.set(0,1.7,-1);
   scene.add(ovule);
 
   //add sperm random position
