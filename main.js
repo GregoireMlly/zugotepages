@@ -128,7 +128,7 @@ function spermGenerate(sperm){
 
     var sideZ= getRndInteger(-1,1);
     var sideX = getRndInteger(-1,1);
-    sperm.scale.set(0.03,0.03,0.03);
+    sperm.scale.set(0.01,0.01,0.01);
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.traverse(function(child) {
