@@ -227,7 +227,7 @@ const init = () => {
   spermArr.push(spermtest);
   scene.add(spermtest);
 
-  const ovule = new Mesh(new BoxGeometry( 1, 1, 1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
+  const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,0,0);
   scene.add(ovule);
 
