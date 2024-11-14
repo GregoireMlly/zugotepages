@@ -116,6 +116,47 @@ var spermArr =[];
 
 const clock = new Clock();
 
+var spermatozoide;
+
+
+
+
+function spermGenerate(sperm){
+  var sperm = sperm.clone();
+  //add sperm random position
+
+
+    var sideZ= getRndInteger(-1,1);
+    var sideX = getRndInteger(-1,1);
+    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
+    sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
+    scene.add(sperm);
+    spermArr.push(sperm);
+    //BoxArr.push((new Box3(new Vector3(), new Vector3())).setFromObject(virus));
+  
+}
+function gltfReader(gltf) {
+  for(let i =0;i<nb_sperm;i++)
+  {
+    spermGenerate(gltf.scene);
+  }
+  renderer.render(scene,camera);
+}
+function loadData() {
+  new GLTFLoader()
+    .setPath('./zugotepages/public/assets/models/')
+    .load('spermatozoide.gltf', gltfReader);
+}
+
+
+
+
+loadData();
+
+
+
+
+
 // Main loop
 const animate = () => {
 
@@ -180,7 +221,7 @@ const init = () => {
   controller.addEventListener('select', onSelect);
   scene.add(controller);
   var spermtest = new Mesh(geometryCone, materialCone);
-  spermtest.position.set(0,0, -0.8).applyMatrix4(controller.matrixWorld);
+  spermtest.position.set(0,0, -2).applyMatrix4(controller.matrixWorld);
   spermtest.lookAt(0,0,0);
   //spermtest.quaternion.setFromRotationMatrix(controller.matrixWorld);
   spermArr.push(spermtest);
@@ -191,16 +232,7 @@ const init = () => {
   scene.add(ovule);
 
   //add sperm random position
-  for (let i = 0; i <nb_sperm ; i++) {
 
-    var sideZ= getRndInteger(-1,1);
-    var sideX = getRndInteger(-1,1);
-    var sperm = new Mesh(geometryCone, materialCone);
-    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
-    sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    scene.add(sperm);
-    spermArr.push(sperm);
-  }
   window.addEventListener('resize', onWindowResize, false);
 }
  
@@ -208,29 +240,10 @@ init();
 
 //
 
-/*
-function loadData() {
-  new GLTFLoader()
-    .setPath('assets/models/')
-    .load('test.glb', gltfReader);
-}
 
 
-function gltfReader(gltf) {
-  let testModel = null;
 
-  testModel = gltf.scene;
 
-  if (testModel != null) {
-    console.log("Model loaded:  " + testModel);
-    scene.add(gltf.scene);
-  } else {
-    console.log("Load FAILED.  ");
-  }
-}
-
-loadData();
-*/
 
 
 // camera.position.z = 3;
