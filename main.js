@@ -133,7 +133,7 @@ function spermGenerate(sperm){
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.traverse(function(child) {
       if (child.isMesh) {
-          child.material = new MeshBasicMaterial({ color: 0x000000 });
+          child.material = new MeshPhongMaterial({ color: 0x000000 });
   
           }});
     scene.add(sperm);
