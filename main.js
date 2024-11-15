@@ -106,7 +106,7 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
-const center_position =new Vector3(0,1.6,0);
+const center_position =new Vector3(0,1.6,2.9);
 
 
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
@@ -135,6 +135,7 @@ function spermGenerate(sperm){
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.lookAt(center_position);
+    sperm.rotation.y+=2*Math.PI/4;
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
