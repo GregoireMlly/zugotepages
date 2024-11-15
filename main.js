@@ -153,10 +153,19 @@ function gltfReader(gltf) {
   renderer.render(scene,camera);
 }
 function loadData() {
-  console.log();
-  new GLTFLoader()
+  console.log(window.location.host);
+  if(window.location.host=="gregoiremlly.github.io")
+  {
+    new GLTFLoader()
     .setPath('./assets/models/')
     .load('spermatozoide.gltf', gltfReader);
+  }
+  else{
+    new GLTFLoader()
+    .setPath('./zugotepages/assets/models/')
+    .load('spermatozoide.gltf', gltfReader);
+  }
+  
 }
 
 
