@@ -153,8 +153,9 @@ function gltfReader(gltf) {
   renderer.render(scene,camera);
 }
 function loadData() {
+  console.log();
   new GLTFLoader()
-    .setPath('./public/assets/models/')
+    .setPath('./assets/models/')
     .load('spermatozoide.gltf', gltfReader);
 }
 
