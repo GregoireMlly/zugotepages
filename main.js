@@ -154,7 +154,7 @@ function gltfReader(gltf) {
 }
 function loadData() {
   new GLTFLoader()
-    .setPath('./zugotepages/public/assets/models/')
+    .setPath('./public/assets/models/')
     .load('spermatozoide.gltf', gltfReader);
 }
 
