@@ -115,7 +115,7 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
-var nb_sperm = 15;
+var nb_sperm = 1;
 var spermSpeed = 0.5;
 var spermArr =[];
 var BoxArr = [];
@@ -190,9 +190,9 @@ function checkHit() {
   // Handle the intersection
   if (intersects.length > 0) {
     const intersectedObject = intersects[0].object;
-    console.log('Model touched:', intersectedObject);
+    //console.log('Model touched:', intersectedObject);
     // You can now trigger an event or effect, such as changing color
-    intersectedObject.material.color.set(0xff0000);  // Change color to red on touch
+    intersectedObject.material.color.set( {color: 0xffffff * Math.random()});  // Change color to red on touch
   }
 }
 
