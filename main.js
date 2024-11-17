@@ -17,7 +17,8 @@ import {
   Scene,
   WebGLRenderer,
   Vector3,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  Box3
 } from 'three';
 
 // XR Emulator
@@ -106,7 +107,7 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
-const center_position =new Vector3(0,1.6,2.9);
+const center_position =new Vector3(0,0,0);
 
 
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
@@ -115,6 +116,7 @@ const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 var nb_sperm = 15;
 var spermSpeed = 0.5;
 var spermArr =[];
+var BoxArr = [];
 
 
 const clock = new Clock();
@@ -135,7 +137,7 @@ function spermGenerate(sperm){
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.lookAt(center_position);
-    sperm.rotation.y+=2*Math.PI/4;
+    sperm.rotation.y-=Math.PI/3;
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
@@ -143,7 +145,8 @@ function spermGenerate(sperm){
           }});
     scene.add(sperm);
     spermArr.push(sperm);
-    //BoxArr.push((new Box3(new Vector3(), new Vector3())).setFromObject(virus));
+    
+    BoxArr.push((new Box3(new Vector3(), new Vector3())).setFromObject(sperm));
   
 }
 function gltfReader(gltf) {
@@ -175,6 +178,11 @@ function loadData() {
 loadData();
 
 
+function checkHit()
+{
+  
+}
+
 
 
 
@@ -190,6 +198,7 @@ const animate = () => {
     direction.normalize();  
     direction.multiplyScalar(spermSpeed * delta);
     spermArr[i].position.add(direction);
+    //spermArr[i].rotation.x+=0.1;
   }
   renderer.render(scene, camera);
 };
@@ -200,7 +209,7 @@ const init = () => {
 
   const aspect = window.innerWidth / window.innerHeight;
   camera = new PerspectiveCamera(75, aspect, 0.1, 10); // meters
-  camera.position.set(0, 1.6, 3);
+  camera.position.set(0, 0, 0);
 
   const light = new AmbientLight(0xffffff, 1.0); // soft white light
   scene.add(light);
@@ -225,7 +234,7 @@ const init = () => {
 
   const controls = new OrbitControls(camera, renderer.domElement);
   //controls.listenToKeyEvents(window); // optional
-  controls.target.set(0, 1.6, 0);
+  controls.target.set(0, 0, 0);
   controls.update();
   // Handle input: see THREE.js webxr_ar_sperms
 //y = hauteur
