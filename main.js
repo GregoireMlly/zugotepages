@@ -180,18 +180,20 @@ function loadData() {
 loadData();
 
 
-function checkHit()
-{
+function checkHit() {
+  // Raycast from the controller position and direction
   raycaster.setFromCamera(controller.position, camera);
-  const intersects = raycaster.intersectObjects(spermArr);
 
+  // Check if the ray intersects with the cube (or other models)
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  // Handle the intersection
   if (intersects.length > 0) {
-    const intersectedObject = intersects[0];
+    const intersectedObject = intersects[0].object;
     console.log('Model touched:', intersectedObject);
     // You can now trigger an event or effect, such as changing color
     intersectedObject.material.color.set(0xff0000);  // Change color to red on touch
   }
-
 }
 
 
@@ -202,7 +204,7 @@ const animate = () => {
 
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
-  
+  checkHit();
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
     const direction = new Vector3().subVectors(center_position, spermArr[i].position);
@@ -211,10 +213,7 @@ const animate = () => {
     spermArr[i].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
   }
-  for (let j = 0;j<BoxArr.length;j++)
-  {
-    BoxArr[j]
-  }
+
   renderer.render(scene, camera);
 };
 
@@ -225,7 +224,7 @@ const init = () => {
   const aspect = window.innerWidth / window.innerHeight;
   camera = new PerspectiveCamera(75, aspect, 0.1, 10); // meters
   camera.position.set(0, 0, 0);
-  center_position =camera.position;
+  center_position = camera.position;
 
   const light = new AmbientLight(0xffffff, 1.0); // soft white light
   scene.add(light);
