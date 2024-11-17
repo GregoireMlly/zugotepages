@@ -18,7 +18,8 @@ import {
   WebGLRenderer,
   Vector3,
   MeshBasicMaterial,
-  Box3
+  Box3,
+  Raycaster
 } from 'three';
 
 // XR Emulator
@@ -113,6 +114,7 @@ var center_position =new Vector3(0,0,0);
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+const raycaster = new Raycaster();
 var nb_sperm = 15;
 var spermSpeed = 0.5;
 var spermArr =[];
@@ -180,7 +182,16 @@ loadData();
 
 function checkHit()
 {
-  
+  raycaster.setFromCamera(controller.position, camera);
+  const intersects = raycaster.intersectObjects(spermArr);
+
+  if (intersects.length > 0) {
+    const intersectedObject = intersects[0];
+    console.log('Model touched:', intersectedObject);
+    // You can now trigger an event or effect, such as changing color
+    intersectedObject.material.color.set(0xff0000);  // Change color to red on touch
+  }
+
 }
 
 
@@ -199,6 +210,10 @@ const animate = () => {
     direction.multiplyScalar(spermSpeed * delta);
     spermArr[i].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
+  }
+  for (let j = 0;j<BoxArr.length;j++)
+  {
+    BoxArr[j]
   }
   renderer.render(scene, camera);
 };
