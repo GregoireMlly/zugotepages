@@ -107,7 +107,7 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
-const center_position =new Vector3(0,0,0);
+var center_position =new Vector3(0,0,0);
 
 
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
@@ -210,6 +210,7 @@ const init = () => {
   const aspect = window.innerWidth / window.innerHeight;
   camera = new PerspectiveCamera(75, aspect, 0.1, 10); // meters
   camera.position.set(0, 0, 0);
+  center_position =camera.position;
 
   const light = new AmbientLight(0xffffff, 1.0); // soft white light
   scene.add(light);
@@ -232,10 +233,10 @@ const init = () => {
   xrButton.style.backgroundColor = 'skyblue';
   document.body.appendChild(xrButton);
 
-  const controls = new OrbitControls(camera, renderer.domElement);
+  //const controls = new OrbitControls(camera, renderer.domElement);
   //controls.listenToKeyEvents(window); // optional
-  controls.target.set(0, 0, 0);
-  controls.update();
+  //controls.target.set(0, 1.6, 0);
+  //controls.update();
   // Handle input: see THREE.js webxr_ar_sperms
 //y = hauteur
 //z = profonderu
@@ -267,13 +268,6 @@ const init = () => {
 }
  
 init();
-
-//
-
-
-
-
-
 
 
 // camera.position.z = 3;
