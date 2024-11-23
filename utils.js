@@ -109,7 +109,7 @@ export function isLookingAt(cameraPos, objectPos, cameraDirection) {
     const dotProduct = AB_norm.x * c_norm.x + AB_norm.y * c_norm.y + AB_norm.z * c_norm.z;
 
     // Seuil pour déterminer si A regarde B (30 degrés de tolérance)
-    const angleThreshold = Math.cos(10 * Math.PI / 180); // convertit 30 degrés en radians
+    const angleThreshold = Math.cos(5 * Math.PI / 180); // convertit 30 degrés en radians
 
     // Si le produit scalaire est supérieur au seuil, A regarde B
     return dotProduct >= angleThreshold;
