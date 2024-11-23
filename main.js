@@ -19,7 +19,8 @@ import {
   Vector3,
   MeshBasicMaterial,
   Box3,
-  Raycaster
+  Raycaster,
+  DoubleSide
 } from 'three';
 
 // XR Emulator
@@ -58,7 +59,7 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
-import { getRndInteger, updateScore } from './utils';
+import { getRndInteger, updateScore,isLookingAt } from './utils';
 import { checkCollision } from './utils';
 import { winOrNot } from './utils';
 import { rotateObject,moveSperm } from './movement';
@@ -109,14 +110,14 @@ let camera, scene, renderer;
 let controller;
 
 var center_position =new Vector3(0,0,0);
-
+const cameraVector = new Vector3(); // create once and reuse it!
 
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
-var nb_sperm = 1;
-var spermSpeed = 0.5;
+var nb_sperm = 4;
+var spermSpeed = 0.1;
 var spermArr =[];
 var BoxArr = [];
 
@@ -125,6 +126,7 @@ const clock = new Clock();
 
 var spermatozoide;
 
+//get the center of the camera and if the position of the center og the camera is the same as the object then kill it
 
 
 
@@ -142,8 +144,8 @@ function spermGenerate(sperm){
     sperm.rotation.y-=Math.PI/3;
     sperm.traverse(function(child) {
       if (child.isMesh) {
-          child.material = new MeshPhongMaterial({ color: 0x000000 });
-  
+          child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+          child.material.side = DoubleSide;
           }});
     scene.add(sperm);
     spermArr.push(sperm);
@@ -181,6 +183,18 @@ loadData();
 
 
 function checkHit() {
+  for (let i = 0; i<spermArr.length; i++)
+  {
+    if (isLookingAt(camera.position,spermArr[i].position,camera.getWorldDirection(cameraVector)))
+    {
+      spermArr[i].traverse(function(child) {
+        if (child.isMesh) {
+            child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+        }
+      });
+    }
+  }
+  /*
   // Raycast from the controller position and direction
   raycaster.setFromCamera(controller.position, camera);
 
@@ -193,15 +207,13 @@ function checkHit() {
     //console.log('Model touched:', intersectedObject);
     // You can now trigger an event or effect, such as changing color
     intersectedObject.material.color.set( {color: 0xffffff * Math.random()});  // Change color to red on touch
-  }
+  }*/
 }
-
-
 
 
 // Main loop
 const animate = () => {
-
+  //console.log(camera.getWorldDirection(cameraVector));
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
   checkHit();
@@ -216,6 +228,7 @@ const animate = () => {
 
   renderer.render(scene, camera);
 };
+
 
 
 const init = () => {
@@ -280,11 +293,10 @@ const init = () => {
 
   window.addEventListener('resize', onWindowResize, false);
 }
+
+
  
 init();
-
-
-// camera.position.z = 3;
 
 
 
