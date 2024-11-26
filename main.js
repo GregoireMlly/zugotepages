@@ -20,7 +20,10 @@ import {
   MeshBasicMaterial,
   Box3,
   Raycaster,
-  DoubleSide
+  DoubleSide,
+  LineBasicMaterial,
+  BufferGeometry,
+  Line,
 } from 'three';
 
 // XR Emulator
@@ -29,6 +32,7 @@ import { XRDevice, metaQuest3 } from 'iwer';
 
 // XR
 import { XRButton } from 'three/addons/webxr/XRButton.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 // If you prefer to import the whole library, with the THREE prefix, use the following line instead:
 // import * as THREE from 'three'
@@ -109,16 +113,16 @@ await setupXR('immersive-ar');
 let camera, scene, renderer;
 let controller;
 
-var center_position =new Vector3(0,0,0);
+var center_position = new Vector3(0,0,0);
 const cameraVector = new Vector3(); // create once and reuse it!
 
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
-var nb_sperm = 4;
+var nb_sperm = 8;
 var spermSpeed = 0.1;
-var spermArr =[];
+var spermArr = [];
 var BoxArr = [];
 
 
@@ -209,6 +213,53 @@ function checkHit() {
     intersectedObject.material.color.set( {color: 0xffffff * Math.random()});  // Change color to red on touch
   }*/
 }
+//croix
+const labelRenderer = new CSS2DRenderer();
+labelRenderer.setSize(window.innerWidth, window.innerHeight);
+labelRenderer.domElement.style.position = 'absolute';
+labelRenderer.domElement.style.top = '0px';
+labelRenderer.domElement.style.pointerEvents = 'none';  // Pour ne pas interférer avec les clics
+document.body.appendChild(labelRenderer.domElement);
+function createCross() {
+  // Créer un conteneur div pour la croix
+  const crossContainer = document.createElement('div');
+  crossContainer.style.position = 'absolute';
+  crossContainer.style.width = '20px';  // Largeur de la croix
+  crossContainer.style.height = '20px'; // Hauteur de la croix
+  crossContainer.style.left = '50%';
+  crossContainer.style.top = '50%';
+  crossContainer.style.transform = 'translate(-50%, -50%)';  // Centrer au milieu de l'écran
+
+  // Ligne horizontale
+  const horizontalLine = document.createElement('div');
+  horizontalLine.style.position = 'absolute';
+  horizontalLine.style.backgroundColor = 'black';
+  horizontalLine.style.width = '100%';
+  horizontalLine.style.height = '2px';  // Épaisseur de la ligne
+  horizontalLine.style.top = '50%';     // Centre verticalement
+
+  // Ligne verticale
+  const verticalLine = document.createElement('div');
+  verticalLine.style.position = 'absolute';
+  verticalLine.style.backgroundColor = 'black';
+  verticalLine.style.width = '2px';  // Épaisseur de la ligne
+  verticalLine.style.height = '100%';
+  verticalLine.style.left = '50%';   // Centre horizontalement
+
+  // Ajouter les lignes au conteneur de la croix
+  crossContainer.appendChild(horizontalLine);
+  crossContainer.appendChild(verticalLine);
+
+  // Convertir la croix en un objet CSS2DObject pour la scène
+  const crossObject = new CSS2DObject(crossContainer);
+  scene.add(crossObject);  // Ajouter à la scène
+
+  return crossObject;
+}
+
+
+
+
 
 
 // Main loop
@@ -225,8 +276,12 @@ const animate = () => {
     spermArr[i].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
   }
+  //renderer.render(scene, camera);
 
-  renderer.render(scene, camera);
+  renderer.setAnimationLoop(() => {
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);  // Rendre les éléments 2D
+  });
 };
 
 
@@ -288,6 +343,8 @@ const init = () => {
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,1.7,-1);
   scene.add(ovule);
+  createCross();
+
 
   //add sperm random position
 
