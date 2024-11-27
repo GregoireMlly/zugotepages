@@ -148,11 +148,11 @@ function spermGenerate(sperm){
     sperm.rotation.y-=Math.PI/3;
     sperm.traverse(function(child) {
       if (child.isMesh) {
-          child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+          child.material = new MeshPhongMaterial({ color: 0xffffff });
           child.material.side = DoubleSide;
           }});
     scene.add(sperm);
-    spermArr.push(sperm);
+    spermArr.push([sperm,0]);
     
     BoxArr.push((new Box3(new Vector3(), new Vector3())).setFromObject(sperm));
   
@@ -164,8 +164,8 @@ function gltfReader(gltf) {
   }
   renderer.render(scene,camera);
 }
+
 function loadData() {
-  console.log(window.location.host);
   if(window.location.host=="gregoiremlly.github.io")
   {
     new GLTFLoader()
@@ -189,13 +189,26 @@ loadData();
 function checkHit() {
   for (let i = 0; i<spermArr.length; i++)
   {
-    if (isLookingAt(camera.position,spermArr[i].position,camera.getWorldDirection(cameraVector)))
+    if (isLookingAt(camera.position,spermArr[i][0].position,camera.getWorldDirection(cameraVector)))
     {
-      spermArr[i].traverse(function(child) {
-        if (child.isMesh) {
-            child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
-        }
-      });
+      console.log(spermArr[i]);
+      if(spermArr[i][1]>= 20)
+      {
+        spermArr[i][0].traverse(function(child) { // mort du sperm
+          if (child.isMesh) {
+              child.material = new MeshPhongMaterial({ color: 0x000000 });
+          }
+        });
+      }
+      else{
+        spermArr[i][0].traverse(function(child) {
+          if (child.isMesh) {
+              child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
+          }
+        });
+        spermArr[i][1]+=1;
+      }
+      
     }
   }
   /*
@@ -270,18 +283,19 @@ const animate = () => {
   checkHit();
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
-    const direction = new Vector3().subVectors(center_position, spermArr[i].position);
+    const direction = new Vector3().subVectors(center_position, spermArr[i][0].position);
     direction.normalize();  
     direction.multiplyScalar(spermSpeed * delta);
-    spermArr[i].position.add(direction);
+    spermArr[i][0].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
   }
-  //renderer.render(scene, camera);
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);  // Rendre les éléments 2D
 
-  renderer.setAnimationLoop(() => {
+  /*renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);  // Rendre les éléments 2D
-  });
+  });*/
 };
 
 
@@ -337,7 +351,7 @@ const init = () => {
   spermtest.position.set(0,0, -2).applyMatrix4(controller.matrixWorld);
   spermtest.lookAt(center_position);
   //spermtest.quaternion.setFromRotationMatrix(controller.matrixWorld);
-  spermArr.push(spermtest);
+  spermArr.push([spermtest,0]);
   scene.add(spermtest);
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
