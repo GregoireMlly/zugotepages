@@ -24,6 +24,8 @@ import {
   LineBasicMaterial,
   BufferGeometry,
   Line,
+  Group,
+  PlaneGeometry
 } from 'three';
 
 // XR Emulator
@@ -119,7 +121,7 @@ const cameraVector = new Vector3(); // create once and reuse it!
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
-const raycaster = new Raycaster();
+//const raycaster = new Raycaster();
 var nb_sperm = 8;
 var spermSpeed = 0.1;
 var spermArr = [];
@@ -191,7 +193,7 @@ function checkHit() {
   {
     if (isLookingAt(camera.position,spermArr[i][0].position,camera.getWorldDirection(cameraVector)))
     {
-      console.log(spermArr[i]);
+      //console.log(spermArr[i]);
       if(spermArr[i][1]>= 20)
       {
         spermArr[i][0].traverse(function(child) { // mort du sperm
@@ -227,49 +229,14 @@ function checkHit() {
   }*/
 }
 //croix
-const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(window.innerWidth, window.innerHeight);
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0px';
-labelRenderer.domElement.style.pointerEvents = 'none';  // Pour ne pas interférer avec les clics
-document.body.appendChild(labelRenderer.domElement);
-function createCross() {
-  // Créer un conteneur div pour la croix
-  const crossContainer = document.createElement('div');
-  crossContainer.style.position = 'absolute';
-  crossContainer.style.width = '20px';  // Largeur de la croix
-  crossContainer.style.height = '20px'; // Hauteur de la croix
-  crossContainer.style.left = '50%';
-  crossContainer.style.top = '50%';
-  crossContainer.style.transform = 'translate(-50%, -50%)';  // Centrer au milieu de l'écran
+const geometryviseur = new PlaneGeometry(0.001, 0.01);
+const geometryviseur2 = new PlaneGeometry(0.01, 0.001);
+  // Définir un matériau noir
+const materialviseur = new MeshBasicMaterial({ color: 0x00ff00, side: DoubleSide });
 
-  // Ligne horizontale
-  const horizontalLine = document.createElement('div');
-  horizontalLine.style.position = 'absolute';
-  horizontalLine.style.backgroundColor = 'black';
-  horizontalLine.style.width = '100%';
-  horizontalLine.style.height = '2px';  // Épaisseur de la ligne
-  horizontalLine.style.top = '50%';     // Centre verticalement
-
-  // Ligne verticale
-  const verticalLine = document.createElement('div');
-  verticalLine.style.position = 'absolute';
-  verticalLine.style.backgroundColor = 'black';
-  verticalLine.style.width = '2px';  // Épaisseur de la ligne
-  verticalLine.style.height = '100%';
-  verticalLine.style.left = '50%';   // Centre horizontalement
-
-  // Ajouter les lignes au conteneur de la croix
-  crossContainer.appendChild(horizontalLine);
-  crossContainer.appendChild(verticalLine);
-
-  // Convertir la croix en un objet CSS2DObject pour la scène
-  const crossObject = new CSS2DObject(crossContainer);
-  scene.add(crossObject);  // Ajouter à la scène
-
-  return crossObject;
-}
-
+  // Créer le mesh (rectangle) à partir de la géométrie et du matériau
+const viseur = new Mesh(geometryviseur, materialviseur);
+const viseur2 = new Mesh(geometryviseur2,materialviseur);
 
 
 
@@ -289,13 +256,10 @@ const animate = () => {
     spermArr[i][0].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
   }
+  viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
+  viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   renderer.render(scene, camera);
-  labelRenderer.render(scene, camera);  // Rendre les éléments 2D
 
-  /*renderer.setAnimationLoop(() => {
-    renderer.render(scene, camera);
-    labelRenderer.render(scene, camera);  // Rendre les éléments 2D
-  });*/
 };
 
 
@@ -356,9 +320,14 @@ const init = () => {
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,1.7,-1);
-  scene.add(ovule);
-  createCross();
-
+  //scene.add(ovule);
+  
+  viseur.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
+  viseur2.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
+  //rectangle.position.z -=0.5;
+  
+  scene.add(viseur);
+  scene.add(viseur2);
 
   //add sperm random position
 
