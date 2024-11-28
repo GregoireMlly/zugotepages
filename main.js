@@ -25,6 +25,11 @@ import {
   BufferGeometry,
   Line,
   Group,
+  BufferAttribute,
+  PointsMaterial,
+  TextureLoader,
+  AdditiveBlending,
+  Points,
   PlaneGeometry
 } from 'three';
 
@@ -127,6 +132,8 @@ var spermSpeed = 0.1;
 var spermArr = [];
 var BoxArr = [];
 
+const viseurcss = document.getElementById("viseurcss");
+
 
 const clock = new Clock();
 
@@ -196,11 +203,21 @@ function checkHit() {
       //console.log(spermArr[i]);
       if(spermArr[i][1]>= 20)
       {
-        spermArr[i][0].traverse(function(child) { // mort du sperm
+        console.log('explosion at ');
+        console.log(spermArr[i][0].position);
+        const explosionCenter = spermArr[i][0].position;
+        // Créer un effet d'explosion
+        const explosion = createExplosionEffect(explosionCenter);
+        // Ajouter l'explosion à la scène
+        scene.add(explosion.particles);
+       /* spermArr[i][0].traverse(function(child) { // mort du sperm
           if (child.isMesh) {
-              child.material = new MeshPhongMaterial({ color: 0x000000 });
+              // Position de l'explosion
+             
+
+              //child.material = new MeshPhongMaterial({ color: 0x000000 });
           }
-        });
+        });*/
       }
       else{
         spermArr[i][0].traverse(function(child) {
@@ -228,7 +245,8 @@ function checkHit() {
     intersectedObject.material.color.set( {color: 0xffffff * Math.random()});  // Change color to red on touch
   }*/
 }
-//croix
+//croix-
+/*
 const geometryviseur = new PlaneGeometry(0.001, 0.01);
 const geometryviseur2 = new PlaneGeometry(0.01, 0.001);
   // Définir un matériau noir
@@ -236,7 +254,44 @@ const materialviseur = new MeshBasicMaterial({ color: 0x00ff00, side: DoubleSide
 
   // Créer le mesh (rectangle) à partir de la géométrie et du matériau
 const viseur = new Mesh(geometryviseur, materialviseur);
-const viseur2 = new Mesh(geometryviseur2,materialviseur);
+const viseur2 = new Mesh(geometryviseur2,materialviseur);*/
+function createExplosionEffect(center, numParticles = 100, radius = 3) {
+  const geometry = new BufferGeometry();
+  const positions = new Float32Array(numParticles * 3); // x, y, z pour chaque particule
+  const velocities = new Float32Array(numParticles * 3); // Vitesse de chaque particule (déplacement)
+
+  // Générer des positions aléatoires autour du centre de l'explosion
+  for (let i = 0; i < numParticles; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const elevation = Math.random() * Math.PI - Math.PI / 2;
+    const distance = Math.random() * radius;
+
+    // Positions 3D des particules
+    positions[i * 3] = center.x + distance * Math.cos(elevation) * Math.cos(angle);
+    positions[i * 3 + 1] = center.y + distance * Math.sin(elevation);
+    positions[i * 3 + 2] = center.z + distance * Math.cos(elevation) * Math.sin(angle);
+
+    // Vitesse des particules
+    velocities[i * 3] = Math.random() * 0.1 - 0.05; // x
+    velocities[i * 3 + 1] = Math.random() * 0.1 - 0.05; // y
+    velocities[i * 3 + 2] = Math.random() * 0.1 - 0.05; // z
+  }
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+
+  // Matériau des particules (effet de feu d'artifice)
+  const material = new PointsMaterial({
+    color: 0xffa500,  // Orange (peut être modifié pour un autre effet)
+    size: 0.1,       // Taille des particules
+    map: new TextureLoader().load('https://threejs.org/examples/textures/sprites/spark1.png'),
+    blending: AdditiveBlending, // Effet lumineux
+    transparent: true,
+  });
+    // Créer l'objet Points qui représente l'explosion
+    const particles = new Points(geometry, material);
+
+    return { particles, velocities };
+  }
+
 
 
 
@@ -256,8 +311,8 @@ const animate = () => {
     spermArr[i][0].position.add(direction);
     //spermArr[i].rotation.x+=0.1;
   }
-  viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
-  viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
+  //viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
+  //viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   renderer.render(scene, camera);
 
 };
@@ -320,14 +375,15 @@ const init = () => {
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,1.7,-1);
+  viseurcss.style.display = "block";
   //scene.add(ovule);
   
-  viseur.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
-  viseur2.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
+  //viseur.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
+  //viseur2.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
   //rectangle.position.z -=0.5;
   
-  scene.add(viseur);
-  scene.add(viseur2);
+  //scene.add(viseur);
+  //scene.add(viseur2);
 
   //add sperm random position
 
