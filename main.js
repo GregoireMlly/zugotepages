@@ -30,7 +30,7 @@ import {
   TextureLoader,
   AdditiveBlending,
   Points,
-  PlaneGeometry
+  PlaneGeometry,
 } from 'three';
 
 // XR Emulator
@@ -66,8 +66,7 @@ import {
 
 } from 'three/addons/controls/OrbitControls.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import {
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
 import { getRndInteger, updateScore,isLookingAt } from './utils';
@@ -134,11 +133,16 @@ var BoxArr = [];
 
 const viseurcss = document.getElementById("viseurcss");
 
+const explosionDuration = 4;
+let elapsedTime = 0;
+let explosionFinished = false;
 
 const clock = new Clock();
 
 var spermatozoide;
-
+let currentScore = 0;
+const fontLoader = new FontLoader();
+let scoreMesh;  // Mesh pour afficher le texte du score
 //get the center of the camera and if the position of the center og the camera is the same as the object then kill it
 
 
@@ -195,7 +199,7 @@ function loadData() {
 loadData();
 
 
-function checkHit() {
+function checkHit(time) {
   for (let i = 0; i<spermArr.length; i++)
   {
     if (isLookingAt(camera.position,spermArr[i][0].position,camera.getWorldDirection(cameraVector)))
@@ -203,13 +207,28 @@ function checkHit() {
       //console.log(spermArr[i]);
       if(spermArr[i][1]>= 20)
       {
+        createScoreText(currentScore+1);
         console.log('explosion at ');
-        console.log(spermArr[i][0].position);
+        console.log(spermArr[i][0]);
+        
+
         const explosionCenter = spermArr[i][0].position;
         // Créer un effet d'explosion
         const explosion = createExplosionEffect(explosionCenter);
+        explosion.particles.name = explosion;
         // Ajouter l'explosion à la scène
+
         scene.add(explosion.particles);
+       
+        console.log();
+        scene.remove(spermArr[i][0]);
+        setTimeout(afterThreeSeconds, 3000);
+        scene.remove(explosion.particles);
+        //spermArr.splice(i, 1);
+
+        // Mettre à jour la géométrie des particules après modification des positions
+        //explosion.particles.geometry.attributes.position.needsUpdate = true;
+        //scene.remove(explosion.particles);
        /* spermArr[i][0].traverse(function(child) { // mort du sperm
           if (child.isMesh) {
               // Position de l'explosion
@@ -245,6 +264,35 @@ function checkHit() {
     intersectedObject.material.color.set( {color: 0xffffff * Math.random()});  // Change color to red on touch
   }*/
 }
+
+//score
+
+function createScoreText(score) {
+  fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    // Créer la géométrie du texte avec le score
+    const textGeometry = new TextGeometry(`Score: ${score}`, {
+      font: font,
+      size: 1,        // Taille du texte
+      height: 0.2,    // Profondeur du texte
+    });
+
+    const textMaterial = new MeshBasicMaterial({ color: 0xffffff });
+    
+    // Si un ancien score existe, on le supprime
+    if (scoreMesh) {
+      scene.remove(scoreMesh);
+    }
+
+    // Créer un mesh pour le score et l'ajouter à la scène
+    scoreMesh = new Mesh(textGeometry, textMaterial);
+    
+    // Positionner le texte dans la scène (devant la caméra)
+    scoreMesh.position.set(0, 2.5, -5);
+
+    scene.add(scoreMesh);
+  });
+}
+
 //croix-
 /*
 const geometryviseur = new PlaneGeometry(0.001, 0.01);
@@ -255,6 +303,7 @@ const materialviseur = new MeshBasicMaterial({ color: 0x00ff00, side: DoubleSide
   // Créer le mesh (rectangle) à partir de la géométrie et du matériau
 const viseur = new Mesh(geometryviseur, materialviseur);
 const viseur2 = new Mesh(geometryviseur2,materialviseur);*/
+
 function createExplosionEffect(center, numParticles = 100, radius = 3) {
   const geometry = new BufferGeometry();
   const positions = new Float32Array(numParticles * 3); // x, y, z pour chaque particule
@@ -286,6 +335,7 @@ function createExplosionEffect(center, numParticles = 100, radius = 3) {
     blending: AdditiveBlending, // Effet lumineux
     transparent: true,
   });
+  
     // Créer l'objet Points qui représente l'explosion
     const particles = new Points(geometry, material);
 
@@ -298,11 +348,11 @@ function createExplosionEffect(center, numParticles = 100, radius = 3) {
 
 
 // Main loop
-const animate = () => {
+const animate = (time) => {
   //console.log(camera.getWorldDirection(cameraVector));
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
-  checkHit();
+  checkHit(time);
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
     const direction = new Vector3().subVectors(center_position, spermArr[i][0].position);
@@ -317,7 +367,11 @@ const animate = () => {
 
 };
 
+function afterThreeSeconds() {
+  console.log('3 secondes se sont écoulées!');
+}
 
+// Utiliser setTimeout pour attendre 3 secondes (3000 millisecondes)
 
 const init = () => {
   scene = new Scene();
@@ -340,7 +394,7 @@ const init = () => {
   renderer.setAnimationLoop(animate); // requestAnimationFrame() replacement, compatible with XR 
   renderer.xr.enabled = true;
   document.body.appendChild(renderer.domElement);
-
+  createScoreText(0);
   
   
 
@@ -370,8 +424,8 @@ const init = () => {
   spermtest.position.set(0,0, -2).applyMatrix4(controller.matrixWorld);
   spermtest.lookAt(center_position);
   //spermtest.quaternion.setFromRotationMatrix(controller.matrixWorld);
-  spermArr.push([spermtest,0]);
-  scene.add(spermtest);
+  //spermArr.push([spermtest,0]);
+ // scene.add(spermtest);
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,1.7,-1);
