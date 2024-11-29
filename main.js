@@ -36,6 +36,7 @@ import {
 // XR Emulator
 import { DevUI } from '@iwer/devui';
 import { XRDevice, metaQuest3 } from 'iwer';
+import { gsap } from 'gsap';
 
 // XR
 import { XRButton } from 'three/addons/webxr/XRButton.js';
@@ -130,6 +131,7 @@ var nb_sperm = 8;
 var spermSpeed = 0.1;
 var spermArr = [];
 var BoxArr = [];
+var explosionArr=[];
 
 const viseurcss = document.getElementById("viseurcss");
 
@@ -208,22 +210,26 @@ function checkHit(time) {
       if(spermArr[i][1]>= 20)
       {
         createScoreText(currentScore+1);
+        currentScore+=1;
         console.log('explosion at ');
         console.log(spermArr[i][0]);
         
 
         const explosionCenter = spermArr[i][0].position;
+      
+          explodeModel(spermArr[i][0]);
+        
         // Créer un effet d'explosion
-        const explosion = createExplosionEffect(explosionCenter);
-        explosion.particles.name = explosion;
+        //const explosion = createExplosionEffect(explosionCenter);
+        //explosion.particles.name = explosion;
         // Ajouter l'explosion à la scène
 
-        scene.add(explosion.particles);
+        //scene.add(explosion.particles);
        
         console.log();
         scene.remove(spermArr[i][0]);
-        setTimeout(afterThreeSeconds, 3000);
-        scene.remove(explosion.particles);
+
+       //scene.remove(explosion.particles);
         //spermArr.splice(i, 1);
 
         // Mettre à jour la géométrie des particules après modification des positions
@@ -273,10 +279,10 @@ function createScoreText(score) {
     const textGeometry = new TextGeometry(`Score: ${score}`, {
       font: font,
       size: 1,        // Taille du texte
-      height: 0.2,    // Profondeur du texte
+      depth: 0.2,    // Profondeur du texte
     });
 
-    const textMaterial = new MeshBasicMaterial({ color: 0xffffff });
+    const textMaterial = new MeshBasicMaterial({ color: 0xee82ee });
     
     // Si un ancien score existe, on le supprime
     if (scoreMesh) {
@@ -287,12 +293,39 @@ function createScoreText(score) {
     scoreMesh = new Mesh(textGeometry, textMaterial);
     
     // Positionner le texte dans la scène (devant la caméra)
-    scoreMesh.position.set(0, 2.5, -5);
+    scoreMesh.position.set(0, 2.5, -6);
 
     scene.add(scoreMesh);
   });
 }
+//explosion
+function explodeModel(model) {
+  // Simule une explosion en augmentant l'échelle et en déplaçant le modèle
+  gsap.to(model.scale, {
+    x: 3,   // Triple la taille
+    y: 3,
+    z: 3,
+    duration: 2,
+    ease: "power3.out"
+  });
 
+  gsap.to(model.position, {
+    x: "+=10",  // Déplace de 10 unités aléatoirement sur les axes
+    y: "+=10",
+    z: "+=10",
+    duration: 2,
+    ease: "power3.out"
+  });
+
+  // Optionnel : Réduire l'opacité du matériau
+  if (model.material) {
+    gsap.to(model.material, {
+      opacity: 0,  // Fait disparaître l'objet
+      duration: 2,
+      ease: "power3.out"
+    });
+  }
+}
 //croix-
 /*
 const geometryviseur = new PlaneGeometry(0.001, 0.01);
@@ -303,7 +336,7 @@ const materialviseur = new MeshBasicMaterial({ color: 0x00ff00, side: DoubleSide
   // Créer le mesh (rectangle) à partir de la géométrie et du matériau
 const viseur = new Mesh(geometryviseur, materialviseur);
 const viseur2 = new Mesh(geometryviseur2,materialviseur);*/
-
+/*
 function createExplosionEffect(center, numParticles = 100, radius = 3) {
   const geometry = new BufferGeometry();
   const positions = new Float32Array(numParticles * 3); // x, y, z pour chaque particule
@@ -344,7 +377,7 @@ function createExplosionEffect(center, numParticles = 100, radius = 3) {
 
 
 
-
+*/
 
 
 // Main loop
@@ -429,7 +462,7 @@ const init = () => {
 
   const ovule = new Mesh(new BoxGeometry( 0.1, 0.1, 0.1 ),new MeshBasicMaterial( {color: 0x00ff00} ));
   ovule.position.set(0,1.7,-1);
-  viseurcss.style.display = "block";
+
   //scene.add(ovule);
   
   //viseur.position.set(camera.position.x,camera.position.y+1.6,camera.position.z-0.1);
