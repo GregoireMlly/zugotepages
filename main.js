@@ -134,7 +134,8 @@ var BoxArr = [];
 var explosionArr=[];
 
 const viseurcss = document.getElementById("viseurcss");
-
+var dirs = [];
+var parts = [];
 const explosionDuration = 4;
 let elapsedTime = 0;
 let explosionFinished = false;
@@ -211,13 +212,12 @@ function checkHit(time) {
       {
         createScoreText(currentScore+1);
         currentScore+=1;
-        console.log('explosion at ');
-        console.log(spermArr[i][0]);
+        //console.log('explosion at ');
+        //console.log(spermArr[i][0]);
         
 
         const explosionCenter = spermArr[i][0].position;
-      
-          explodeModel(spermArr[i][0]);
+        parts.push(new ExplodeAnimation(spermArr[i][0].position.x,spermArr[i][0].position.y,spermArr[i][0].position.z));
         
         // Créer un effet d'explosion
         //const explosion = createExplosionEffect(explosionCenter);
@@ -230,7 +230,7 @@ function checkHit(time) {
         scene.remove(spermArr[i][0]);
 
        //scene.remove(explosion.particles);
-        //spermArr.splice(i, 1);
+        spermArr.splice(i, 1);
 
         // Mettre à jour la géométrie des particules après modification des positions
         //explosion.particles.geometry.attributes.position.needsUpdate = true;
@@ -299,31 +299,69 @@ function createScoreText(score) {
   });
 }
 //explosion
-function explodeModel(model) {
-  // Simule une explosion en augmentant l'échelle et en déplaçant le modèle
-  gsap.to(model.scale, {
-    x: 3,   // Triple la taille
-    y: 3,
-    z: 3,
-    duration: 2,
-    ease: "power3.out"
-  });
+function ExplodeAnimation(x, y, z) {
+  var movementSpeed = 80;       // Vitesse de mouvement des particules
+  var totalObjects = 1000;      // Nombre total de particules
+  var objectSize = 10;          // Taille des particules
+  var sizeRandomness = 4000;    // Aléatoire pour les distances
+  var colors = [0xFF0FFF, 0xCCFF00, 0xFF000F, 0x996600, 0xFFFFFF];  // Couleurs des particules
 
-  gsap.to(model.position, {
-    x: "+=10",  // Déplace de 10 unités aléatoirement sur les axes
-    y: "+=10",
-    z: "+=10",
-    duration: 2,
-    ease: "power3.out"
-  });
+  // Créer une BufferGeometry pour les particules
+  const geometry = new BufferGeometry();
 
-  // Optionnel : Réduire l'opacité du matériau
-  if (model.material) {
-    gsap.to(model.material, {
-      opacity: 0,  // Fait disparaître l'objet
-      duration: 2,
-      ease: "power3.out"
+  // Tableaux pour les positions des particules
+  const positions = new Float32Array(totalObjects * 3);  // 3 coordonnées pour chaque particule
+
+  // Initialiser les positions et les directions des particules
+  for (let i = 0; i < totalObjects; i++) {
+    const index = i * 3;
+    positions[index] = x + (Math.random() - 0.5) * sizeRandomness;   // Position X avec aléatoire
+    positions[index + 1] = y + (Math.random() - 0.5) * sizeRandomness; // Position Y avec aléatoire
+    positions[index + 2] = z + (Math.random() - 0.5) * sizeRandomness; // Position Z avec aléatoire
+
+    // Stocker les directions aléatoires pour chaque particule
+    dirs.push({
+      x: (Math.random() * movementSpeed) - (movementSpeed / 2),   // Direction X
+      y: (Math.random() * movementSpeed) - (movementSpeed / 2),   // Direction Y
+      z: (Math.random() * movementSpeed) - (movementSpeed / 2)    // Direction Z
     });
+  }
+
+  // Attribuer les positions à la géométrie
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+
+  // Créer le matériau des particules
+  const material = new PointsMaterial({
+    size: objectSize,
+    color: colors[Math.floor(Math.random() * colors.length)]  // Couleur aléatoire parmi les choix
+  });
+
+  // Créer un système de particules
+  const particles = new Points(geometry, material);
+
+  // Ajouter l'objet à la scène
+  this.object = particles;
+  this.status = true;
+  scene.add(this.object);
+
+  // Méthode de mise à jour pour animer l'explosion
+  this.update = function () {
+    if (this.status === true) {
+      const positions = this.object.geometry.attributes.position.array;
+      
+      // Mettre à jour les positions des particules
+      for (let i = 0; i < totalObjects; i++) {
+        const index = i * 3;
+        
+        // Mettre à jour les coordonnées des particules
+        positions[index] += dirs[i].x;
+        positions[index + 1] += dirs[i].y;
+        positions[index + 2] += dirs[i].z;
+      }
+
+      // Indiquer que les positions des particules ont été mises à jour
+      this.object.geometry.attributes.position.needsUpdate = true;
+    }
   }
 }
 //croix-
