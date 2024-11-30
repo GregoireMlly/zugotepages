@@ -132,7 +132,7 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
 var nb_sperm = 20;
-var spermSpeed = 0.1;
+var spermSpeed =0;// 0.04;
 var spermArr = [];
 var BoxArr = [];
 var explosionArr=[];
@@ -164,9 +164,9 @@ function spermGenerate(sperm){
     sperm.scale.set(0.01,0.01,0.01);
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5));//.applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    sperm.lookAt(center_position);
+    sperm.lookAt(camera.position);
     
-    sperm.rotation.z+=Math.PI/2;
+    //sperm.rotation.y+=Math.PI/2;
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
@@ -454,7 +454,7 @@ const animate = (time) => {
     direction.normalize();  
     direction.multiplyScalar(spermSpeed * delta);
     spermArr[i][0].position.add(direction);
-    //spermArr[i].rotation.x+=0.1;
+    spermArr[i][0].lookAt(camera.position);
   }
   //viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   //viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
