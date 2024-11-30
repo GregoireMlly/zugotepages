@@ -193,7 +193,7 @@ function spermGenerate(sperm){
         }
         else{
           if (x>0.8 && z>0.8){
-            sperm.rotation.y-=Math.PI;// - 2pi/3
+            sperm.rotation.y-=2*Math.PI/6;// - 2pi/3
 
           }
           if(x>0.8 && z < -0.8)
