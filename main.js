@@ -327,7 +327,7 @@ function createEndMessage() {
     });
     const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
     const textMesh = new Mesh(textGeometry, textMaterial);
-    textMesh.position.set(0, 1.5, -1.5);  // Centrer le texte
+    textMesh.position.set(-1, 1.5, -3);  // Centrer le texte
     scene.add(textMesh);
   });
 }
