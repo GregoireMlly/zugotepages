@@ -168,7 +168,7 @@ function spermGenerate(sperm){
     //sperm.rotation.y-=Math.PI/3;
     sperm.traverse(function(child) {
       if (child.isMesh) {
-          child.material = new MeshPhongMaterial({ color: 0xffffff });
+          child.material = new MeshPhongMaterial({ color: 0x000000 });
           child.material.side = DoubleSide;
           }});
     scene.add(sperm);
@@ -415,6 +415,7 @@ function ExplodeAnimation(x, y, z) {
 //croix-
 
 //laser
+/*
 let laserMesh;
 
 
@@ -425,6 +426,7 @@ function updateLaser() {
   laserMesh.position.y-=0.07;
   laserMesh.position.z-=0.1;
 
+
   // Calculer la direction dans laquelle la caméra regarde
   const laserDirection = new Vector3();
   camera.getWorldDirection(laserDirection);
@@ -433,15 +435,17 @@ function updateLaser() {
   const laserEndPosition = new Vector3();
   laserEndPosition.copy(laserDirection).multiplyScalar(-5).add(camera.position);  // Multiplier pour allonger le laser
  laserEndPosition.y-=1;
+ 
   // Ajuster la position et la rotation du laser pour qu'il pointe dans la bonne direction
   laserMesh.lookAt(camera.getWorldDirection(laserEndPosition));
-}
+  laserMesh.rotation.y+=1;
+}*/
 // Main loop
 const animate = (time) => {
   //console.log(camera.getWorldDirection(cameraVector));
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
-  updateLaser();
+  //updateLaser();
   checkHit(time);
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
@@ -453,6 +457,8 @@ const animate = (time) => {
   }
   //viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   //viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
+  center_position = camera.position;
+
   renderer.render(scene, camera);
 
 };
@@ -526,7 +532,7 @@ const onSelect = (event) => {
   controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
   scene.add(controllerGrip1);
   buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
-
+/*
   //const laserGeometry = new CylinderGeometry(0.01, 0.01, 5, 32);  // Petit rayon, grande longueur
   const laserGeometry = new ConeGeometry(0.05, 2, 32);  // Base de rayon 0.05, hauteur 2
   const laserMaterial = new MeshBasicMaterial({ color: 0xff0000 });
@@ -535,7 +541,7 @@ const onSelect = (event) => {
   // Rotation pour aligner le laser dans l'axe Z
   laserMesh.rotation.x = Math.PI / 2;  // Aligné avec l'axe de la caméra
   scene.add(laserMesh);  // Ajouter le laser à la scène
-
+*/
 
 
 
