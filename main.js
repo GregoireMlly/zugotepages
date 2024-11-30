@@ -32,7 +32,11 @@ import {
   Points,
   PlaneGeometry,
   Matrix4,
-  ConeGeometry 
+  ConeGeometry,
+  AudioListener,
+  PositionalAudio,
+  AudioLoader,
+  DirectionalLight
   
 } from 'three';
 
@@ -132,7 +136,7 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
 var nb_sperm = 20;
-var spermSpeed =0;// 0.04;
+var spermSpeed =2;//0;// 0.04;
 var spermArr = [];
 var BoxArr = [];
 var explosionArr=[];
@@ -140,6 +144,7 @@ var explosionArr=[];
 const viseurcss = document.getElementById("viseurcss");
 var dirs = [];
 var parts = [];
+let gtlfglobal;
 const explosionDuration = 4;
 let elapsedTime = 0;
 let explosionFinished = false;
@@ -228,6 +233,7 @@ function spermGenerate(sperm){
   
 }
 function gltfReader(gltf) {
+  gtlfglobal = gltf;
   for(let i =0;i<nb_sperm;i++)
   {
     spermGenerate(gltf.scene);
@@ -254,6 +260,37 @@ function loadData() {
 
 
 loadData();
+///musique
+
+
+const listener = new AudioListener();
+// L'audio sera écouté depuis la perspective de la caméra
+
+// Créer un PositionalAudio pour placer le son à une position donnée dans la scène
+const sound = new PositionalAudio(listener);
+
+// Charger un fichier audio (par exemple, 'music.mp3')
+const audioLoader = new AudioLoader();
+if(window.location.host=="gregoiremlly.github.io")
+  {
+    audioLoader.load('./assets/musique/musique-epique-de-skyrim_SCyFcdcI.mp3', function(buffer) {
+      // Une fois le fichier chargé, attribuer le buffer au son et le jouer
+      sound.setBuffer(buffer);
+      sound.setRefDistance(10);  // Distance de référence pour l'atténuation du son
+      sound.setLoop(true);  // Boucle si tu veux que la musique continue
+             // Jouer la musique
+    });
+  }
+  else{
+    audioLoader.load('/zugotepages/public/assets/musique/musique-epique-de-skyrim_SCyFcdcI.mp3', function(buffer) {
+      // Une fois le fichier chargé, attribuer le buffer au son et le jouer
+      sound.setBuffer(buffer);
+      sound.setRefDistance(10);  // Distance de référence pour l'atténuation du son
+      sound.setLoop(true);  // Boucle si tu veux que la musique continue
+             // Jouer la musique
+    });
+  }
+
 
 
 
@@ -353,7 +390,7 @@ function createScoreText(score) {
     scoreMesh = new Mesh(textGeometry, textMaterial);
     
     // Positionner le texte dans la scène (devant la caméra)
-    scoreMesh.position.set(0, 2.5, -6);
+    scoreMesh.position.set(2, 3.5, -6);
 
     scene.add(scoreMesh);
   });
@@ -371,14 +408,14 @@ let group;
 
 function createEndMessage() {
   loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const textGeometry = new TextGeometry('Fin', {
+    const textGeometry = new TextGeometry('Fin Replay ?', {
       font: font,
-      size: 1,
+      size: 0.7,
       depth: 0.2,
     });
     const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
     const textMesh = new Mesh(textGeometry, textMaterial);
-    textMesh.position.set(-2, 1.2, -3);  // Centrer le texte
+    textMesh.position.set(-2.5, 0.5, -3);  // Centrer le texte
     scene.add(textMesh);
   });
 }
@@ -392,7 +429,16 @@ function createReplayButton() {
 
 function onButtonClick() {
   console.log("Replay button clicked!");
-  buttonMesh.material.color.set(0xff0000);  // Changer la couleur du bouton pour indiquer le clic
+  currentScore = 0;
+  createScoreText(0);
+  spermArr=[];
+  for(let i =0;i<nb_sperm;i++)
+    {
+      spermGenerate(gtlfglobal.scene);
+    }
+  //buttonMesh.material.color.set(0x000000);  // Changer la couleur du bouton pour indiquer le clic
+  scene.remove(buttonMesh);
+  //scene.remove(group);
 }
 
 
@@ -510,7 +556,8 @@ const animate = (time) => {
   //viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   //viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   center_position = camera.position;
-
+  sound.position.set(0, 0, 0);
+  scene.add(sound);
   renderer.render(scene, camera);
 
 };
@@ -529,12 +576,14 @@ const init = () => {
   camera.position.set(0, 0, 0);
   center_position = camera.position;
 
-  const light = new AmbientLight(0xffffff, 1.0); // soft white light
-  scene.add(light);
-
+  const sunlight = new DirectionalLight(0xffffff, 1);
+  scene.add(sunlight);
+  sunlight.position.set(5, 5, 5);  // Position de la lumière (comme un soleil lointain)
+  sunlight.castShadow = true;
+/*
   const hemiLight = new HemisphereLight(0xffffff, 0xbbbbff, 3);
   hemiLight.position.set(0.5, 1, 0.25);
-  scene.add(hemiLight);
+  scene.add(hemiLight);*/
 
   renderer = new WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -559,12 +608,13 @@ const init = () => {
 //z = profonderu
 //x = horizontal
 const onSelect = (event) => {
-
+  sound.play(); 
   //sperm.position.set(0, 0, -0.3).applyMatrix4(controller.matrixWorld);
   //sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
   //scene.add(sperm);
 
 }
+camera.add(listener);  
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
@@ -573,7 +623,7 @@ const onSelect = (event) => {
   spermtest.lookAt(center_position);
   group = new Group();
   
-  const buttonGeometry = new BoxGeometry(0.3, 0.2, 0.1);
+  const buttonGeometry = new BoxGeometry(5, 1, 0.1);
   const buttonMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
   buttonMesh = new Mesh(buttonGeometry, buttonMaterial);
   group.add(buttonMesh);
@@ -583,7 +633,7 @@ const onSelect = (event) => {
   const controllerGrip1 = renderer.xr.getControllerGrip(0);
   controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
   scene.add(controllerGrip1);
-  buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
+  buttonMesh.position.set(-0.7, 1, -3.1);  // Positionner sous le texte
 /*
   //const laserGeometry = new CylinderGeometry(0.01, 0.01, 5, 32);  // Petit rayon, grande longueur
   const laserGeometry = new ConeGeometry(0.05, 2, 32);  // Base de rayon 0.05, hauteur 2
