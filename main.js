@@ -32,6 +32,7 @@ import {
   Points,
   PlaneGeometry,
   Matrix4,
+  ConeGeometry 
   
 } from 'three';
 
@@ -421,8 +422,8 @@ let laserMesh;
 function updateLaser() {
   // Positionner le laser à la position de la caméra
   laserMesh.position.copy(camera.position);
-  laserMesh.position.y-=0.1;
-  //laserMesh.position.z+=0.4;
+  laserMesh.position.y-=0.07;
+  laserMesh.position.z-=0.1;
 
   // Calculer la direction dans laquelle la caméra regarde
   const laserDirection = new Vector3();
@@ -430,10 +431,10 @@ function updateLaser() {
 
   // Positionner l'extrémité du laser dans la direction de la caméra
   const laserEndPosition = new Vector3();
-  laserEndPosition.copy(laserDirection).multiplyScalar(5).add(camera.position);  // Multiplier pour allonger le laser
-
+  laserEndPosition.copy(laserDirection).multiplyScalar(-5).add(camera.position);  // Multiplier pour allonger le laser
+ laserEndPosition.y-=1;
   // Ajuster la position et la rotation du laser pour qu'il pointe dans la bonne direction
-  laserMesh.lookAt(camera.getWorldDirection(laserDirection));
+  laserMesh.lookAt(camera.getWorldDirection(laserEndPosition));
 }
 // Main loop
 const animate = (time) => {
@@ -526,7 +527,8 @@ const onSelect = (event) => {
   scene.add(controllerGrip1);
   buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
 
-  const laserGeometry = new CylinderGeometry(0.01, 0.01, 5, 32);  // Petit rayon, grande longueur
+  //const laserGeometry = new CylinderGeometry(0.01, 0.01, 5, 32);  // Petit rayon, grande longueur
+  const laserGeometry = new ConeGeometry(0.05, 2, 32);  // Base de rayon 0.05, hauteur 2
   const laserMaterial = new MeshBasicMaterial({ color: 0xff0000 });
   laserMesh = new Mesh(laserGeometry, laserMaterial);
   laserMesh.side = DoubleSide;
