@@ -340,7 +340,7 @@ function checkHit(time) {
           scene.remove(spermArr[i][0]);
         }
     }
-    spermArr[i][0].rotation.z+=1.5;
+    spermArr[i][0].rotation.x+=1.5;
   }
   /*
   // Raycast from the controller position and direction
