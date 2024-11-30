@@ -174,13 +174,16 @@ function spermGenerate(sperm){
       {
         sperm.rotation.y+=Math.PI;
       }
+      else{
+        sperm.rotation.y+=Math.PI/2
+      }
     }
     else{
       if((z>=2||z<=2)&& x>=1 && x<=1 )
         {
           if(z>=2)
           {
-            sperm.rotation.y+=Math.PI/2;
+            sperm.rotation.y-=Math.PI/2;
           }
           else{
             sperm.rotation.y-=Math.PI/2;
@@ -201,6 +204,7 @@ function spermGenerate(sperm){
           if(x<-1 && z >1)
           {
             sperm.rotation.y-=Math.PI/3;
+            sperm.rotation.y+=Math.PI;
           }
         }
         
