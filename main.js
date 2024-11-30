@@ -36,7 +36,8 @@ import {
   AudioListener,
   PositionalAudio,
   AudioLoader,
-  DirectionalLight
+  DirectionalLight,
+  
   
 } from 'three';
 
@@ -82,6 +83,7 @@ import { getRndInteger, updateScore,isLookingAt,calculateDistance } from './util
 import { checkCollision } from './utils';
 import { winOrNot } from './utils';
 import { rotateObject,moveSperm } from './movement';
+import { remove } from 'three/examples/jsm/libs/tween.module.js';
 
 // Example of hard link to official repo for data, if needed
 // const MODEL_PATH = 'https://raw.githubusercontent.com/mrdoob/js/r148/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb';
@@ -127,7 +129,10 @@ await setupXR('immersive-ar');
 // INSERT CODE HERE
 let camera, scene, renderer;
 let controller;
+const explosionCenter = new Vector3(0, 0, 0);
 
+// Créer un effet d'explosion
+const explosion = createExplosionEffect(explosionCenter);
 var center_position = new Vector3(0,0,0);
 const cameraVector = new Vector3(); // create once and reuse it!
 
@@ -309,7 +314,7 @@ function checkHit(time) {
         currentScore+=1;
         var sideZ= getRndInteger(-1,1);
         var sideX = getRndInteger(-1,1);
-        parts.push(new ExplodeAnimation(spermArr[i][0].position.x,spermArr[i][0].position.y,spermArr[i][0].position.z));
+        //parts.push(new ExplodeAnimation(spermArr[i][0].position.x,spermArr[i][0].position.y,spermArr[i][0].position.z));
         //scene.remove(spermArr[i][0]);
         
         spermArr[i][0].position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
@@ -334,6 +339,9 @@ function checkHit(time) {
     {
       
       console.log('lost');
+
+// Ajouter l'explosion à la scène
+    scene.add(explosion.particles);
       createEndMessage("Lost replay ?");
       createReplayButton();
       for(let i = 0;i<spermArr.length;i++)
@@ -443,77 +451,52 @@ function onButtonClick() {
   //buttonMesh.material.color.set(0x000000);  // Changer la couleur du bouton pour indiquer le clic
   scene.remove(buttonMesh);
   scene.remove(textMesh);
-
+  scene.remove(explosion.particles);
   //scene.remove(group);
 }
 
 
 //explosion
-function ExplodeAnimation(x, y, z) {
-  var movementSpeed = 80;       // Vitesse de mouvement des particules
-  var totalObjects = 1000;      // Nombre total de particules
-  var objectSize = 10;          // Taille des particules
-  var sizeRandomness = 4000;    // Aléatoire pour les distances
-  var colors = [0xFF0FFF, 0xCCFF00, 0xFF000F, 0x996600, 0xFFFFFF];  // Couleurs des particules
-
-  // Créer une BufferGeometry pour les particules
+function createExplosionEffect(center, numParticles = 1000, radius = 3) {
   const geometry = new BufferGeometry();
+  const positions = new Float32Array(numParticles * 3); // x, y, z pour chaque particule
+  const velocities = new Float32Array(numParticles * 3); // Vitesse de chaque particule (déplacement)
 
-  // Tableaux pour les positions des particules
-  const positions = new Float32Array(totalObjects * 3);  // 3 coordonnées pour chaque particule
+  // Générer des positions aléatoires autour du centre de l'explosion
+  for (let i = 0; i < numParticles; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const elevation = Math.random() * Math.PI - Math.PI / 2;
+    const distance = Math.random() * radius;
 
-  // Initialiser les positions et les directions des particules
-  for (let i = 0; i < totalObjects; i++) {
-    const index = i * 3;
-    positions[index] = x + (Math.random() - 0.5) * sizeRandomness;   // Position X avec aléatoire
-    positions[index + 1] = y + (Math.random() - 0.5) * sizeRandomness; // Position Y avec aléatoire
-    positions[index + 2] = z + (Math.random() - 0.5) * sizeRandomness; // Position Z avec aléatoire
+    // Positions 3D des particules
+    positions[i * 3] = center.x + distance * Math.cos(elevation) * Math.cos(angle);
+    positions[i * 3 + 1] = center.y + distance * Math.sin(elevation);
+    positions[i * 3 + 2] = center.z + distance * Math.cos(elevation) * Math.sin(angle);
 
-    // Stocker les directions aléatoires pour chaque particule
-    dirs.push({
-      x: (Math.random() * movementSpeed) - (movementSpeed / 2),   // Direction X
-      y: (Math.random() * movementSpeed) - (movementSpeed / 2),   // Direction Y
-      z: (Math.random() * movementSpeed) - (movementSpeed / 2)    // Direction Z
-    });
+    // Vitesse des particules
+    velocities[i * 3] = Math.random() * 0.1 - 0.05; // x
+    velocities[i * 3 + 1] = Math.random() * 0.1 - 0.05; // y
+    velocities[i * 3 + 2] = Math.random() * 0.1 - 0.05; // z
   }
 
-  // Attribuer les positions à la géométrie
+  // Ajouter les positions à la géométrie
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
 
-  // Créer le matériau des particules
+  // Matériau des particules (effet de feu d'artifice)
   const material = new PointsMaterial({
-    size: objectSize,
-    color: colors[Math.floor(Math.random() * colors.length)]  // Couleur aléatoire parmi les choix
+    color: 0xffa500,  // Orange (peut être modifié pour un autre effet)
+    size: 0.3,       // Taille des particules
+    map: new TextureLoader().load('https://threejs.org/examples/textures/sprites/spark1.png'),
+    blending: AdditiveBlending, // Effet lumineux
+    transparent: true,
   });
 
-  // Créer un système de particules
+  // Créer l'objet Points qui représente l'explosion
   const particles = new Points(geometry, material);
 
-  // Ajouter l'objet à la scène
-  this.object = particles;
-  this.status = true;
-  scene.add(this.object);
-
-  // Méthode de mise à jour pour animer l'explosion
-  this.update = function () {
-    if (this.status === true) {
-      const positions = this.object.geometry.attributes.position.array;
-      
-      // Mettre à jour les positions des particules
-      for (let i = 0; i < totalObjects; i++) {
-        const index = i * 3;
-        
-        // Mettre à jour les coordonnées des particules
-        positions[index] += dirs[i].x;
-        positions[index + 1] += dirs[i].y;
-        positions[index + 2] += dirs[i].z;
-      }
-
-      // Indiquer que les positions des particules ont été mises à jour
-      this.object.geometry.attributes.position.needsUpdate = true;
-    }
-  }
+  return { particles, velocities };
 }
+
 //croix-
 
 //laser
@@ -564,6 +547,24 @@ const animate = (time) => {
   center_position = camera.position;
   sound.position.set(0, 0, 0);
   scene.add(sound);
+
+  const positions = explosion.particles.geometry.attributes.position.array;
+  const velocities = explosion.velocities;
+
+  for (let i = 0; i < positions.length / 3; i++) {
+    positions[i * 3] += velocities[i * 3];
+    positions[i * 3 + 1] += velocities[i * 3 + 1];
+    positions[i * 3 + 2] += velocities[i * 3 + 2];
+
+    // Réduire la vitesse au fil du temps (simuler la dissipation)
+    velocities[i * 3] *= 0.99;
+    velocities[i * 3 + 1] *= 0.99;
+    velocities[i * 3 + 2] *= 0.99;
+  }
+
+  // Mettre à jour la géométrie des particules après modification des positions
+  explosion.particles.geometry.attributes.position.needsUpdate = true;
+
   renderer.render(scene, camera);
 
 };
