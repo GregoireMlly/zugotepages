@@ -31,6 +31,8 @@ import {
   AdditiveBlending,
   Points,
   PlaneGeometry,
+  Matrix4,
+  
 } from 'three';
 
 // XR Emulator
@@ -66,11 +68,12 @@ import {
   OrbitControls,
 
 } from 'three/addons/controls/OrbitControls.js';
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';import {
   GLTFLoader
 } from 'three/addons/loaders/GLTFLoader.js';
-import { getRndInteger, updateScore,isLookingAt } from './utils';
+import { getRndInteger, updateScore,isLookingAt,calculateDistance } from './utils';
 import { checkCollision } from './utils';
 import { winOrNot } from './utils';
 import { rotateObject,moveSperm } from './movement';
@@ -126,8 +129,8 @@ const cameraVector = new Vector3(); // create once and reuse it!
 const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2);
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
-//const raycaster = new Raycaster();
-var nb_sperm = 8;
+const raycaster = new Raycaster();
+var nb_sperm = 20;
 var spermSpeed = 0.1;
 var spermArr = [];
 var BoxArr = [];
@@ -158,10 +161,10 @@ function spermGenerate(sperm){
     var sideZ= getRndInteger(-1,1);
     var sideX = getRndInteger(-1,1);
     sperm.scale.set(0.01,0.01,0.01);
-    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
+    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5));//.applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.lookAt(center_position);
-    sperm.rotation.y-=Math.PI/3;
+    //sperm.rotation.y-=Math.PI/3;
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0xffffff });
@@ -202,49 +205,34 @@ function loadData() {
 loadData();
 
 
+
+
+
 function checkHit(time) {
   for (let i = 0; i<spermArr.length; i++)
   {
-    if (isLookingAt(camera.position,spermArr[i][0].position,camera.getWorldDirection(cameraVector)))
+
+    if (isLookingAt(camera.position,spermArr[i][0].position,camera.getWorldDirection(cameraVector)))// si le sperm est dans la ligne de vue de la caméra
     {
-      //console.log(spermArr[i]);
-      if(spermArr[i][1]>= 20)
+      if(spermArr[i][1]>= 20) // si le sperm meurt
       {
         createScoreText(currentScore+1);
         currentScore+=1;
-        //console.log('explosion at ');
-        //console.log(spermArr[i][0]);
-        
-
-        const explosionCenter = spermArr[i][0].position;
+        var sideZ= getRndInteger(-1,1);
+        var sideX = getRndInteger(-1,1);
         parts.push(new ExplodeAnimation(spermArr[i][0].position.x,spermArr[i][0].position.y,spermArr[i][0].position.z));
+        //scene.remove(spermArr[i][0]);
         
-        // Créer un effet d'explosion
-        //const explosion = createExplosionEffect(explosionCenter);
-        //explosion.particles.name = explosion;
-        // Ajouter l'explosion à la scène
-
-        //scene.add(explosion.particles);
-       
-        console.log();
-        scene.remove(spermArr[i][0]);
-
-       //scene.remove(explosion.particles);
-        spermArr.splice(i, 1);
-
-        // Mettre à jour la géométrie des particules après modification des positions
-        //explosion.particles.geometry.attributes.position.needsUpdate = true;
-        //scene.remove(explosion.particles);
-       /* spermArr[i][0].traverse(function(child) { // mort du sperm
+        spermArr[i][0].position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5)).applyMatrix4(controller.matrixWorld);
+        spermArr[i][0].traverse(function(child) {
           if (child.isMesh) {
-              // Position de l'explosion
-             
-
-              //child.material = new MeshPhongMaterial({ color: 0x000000 });
+              child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
           }
-        });*/
+        });
+        //spermArr.splice(i, 1);
+
       }
-      else{
+      else{ // si le sperm est touché
         spermArr[i][0].traverse(function(child) {
           if (child.isMesh) {
               child.material = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
@@ -252,7 +240,17 @@ function checkHit(time) {
         });
         spermArr[i][1]+=1;
       }
+    }
+    if (calculateDistance(spermArr[i][0].position.x,spermArr[i][0].position.z,camera.position.x,camera.position.z)<0.09)// si un sperm touche la caméra
+    {
       
+      console.log('lost');
+      createEndMessage();
+      createReplayButton();
+      for(let i = 0;i<spermArr.length;i++)
+        {
+          scene.remove(spermArr[i][0]);
+        }
     }
   }
   /*
@@ -274,6 +272,17 @@ function checkHit(time) {
 //score
 
 function createScoreText(score) {
+  if(score ==30)
+  {
+    console.log('win');
+    for(let i = 0;i<spermArr.length;i++)
+    {
+      scene.remove(spermArr[i][0]);
+    }
+    createEndMessage();
+    createReplayButton();
+
+  }
   fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
     // Créer la géométrie du texte avec le score
     const textGeometry = new TextGeometry(`Score: ${score}`, {
@@ -298,6 +307,44 @@ function createScoreText(score) {
     scene.add(scoreMesh);
   });
 }
+const tempMatrix = new Matrix4();  // Stocke la transformation du contrôleur
+
+// Création du bouton 3D
+let buttonMesh;
+let controller1;
+const loader = new FontLoader();
+let group;
+
+
+
+
+function createEndMessage() {
+  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    const textGeometry = new TextGeometry('Fin', {
+      font: font,
+      size: 1,
+      height: 0.2,
+    });
+    const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+    const textMesh = new Mesh(textGeometry, textMaterial);
+    textMesh.position.set(0, 1.5, -1.5);  // Centrer le texte
+    scene.add(textMesh);
+  });
+}
+// Fonction pour créer un bouton 3D cliquable "Replay"
+function createReplayButton() {
+  
+  scene.add(buttonMesh);
+  scene.add(group);
+}
+
+
+function onButtonClick() {
+  console.log("Replay button clicked!");
+  buttonMesh.material.color.set(0xff0000);  // Changer la couleur du bouton pour indiquer le clic
+}
+
+
 //explosion
 function ExplodeAnimation(x, y, z) {
   var movementSpeed = 80;       // Vitesse de mouvement des particules
@@ -365,57 +412,7 @@ function ExplodeAnimation(x, y, z) {
   }
 }
 //croix-
-/*
-const geometryviseur = new PlaneGeometry(0.001, 0.01);
-const geometryviseur2 = new PlaneGeometry(0.01, 0.001);
-  // Définir un matériau noir
-const materialviseur = new MeshBasicMaterial({ color: 0x00ff00, side: DoubleSide });
 
-  // Créer le mesh (rectangle) à partir de la géométrie et du matériau
-const viseur = new Mesh(geometryviseur, materialviseur);
-const viseur2 = new Mesh(geometryviseur2,materialviseur);*/
-/*
-function createExplosionEffect(center, numParticles = 100, radius = 3) {
-  const geometry = new BufferGeometry();
-  const positions = new Float32Array(numParticles * 3); // x, y, z pour chaque particule
-  const velocities = new Float32Array(numParticles * 3); // Vitesse de chaque particule (déplacement)
-
-  // Générer des positions aléatoires autour du centre de l'explosion
-  for (let i = 0; i < numParticles; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const elevation = Math.random() * Math.PI - Math.PI / 2;
-    const distance = Math.random() * radius;
-
-    // Positions 3D des particules
-    positions[i * 3] = center.x + distance * Math.cos(elevation) * Math.cos(angle);
-    positions[i * 3 + 1] = center.y + distance * Math.sin(elevation);
-    positions[i * 3 + 2] = center.z + distance * Math.cos(elevation) * Math.sin(angle);
-
-    // Vitesse des particules
-    velocities[i * 3] = Math.random() * 0.1 - 0.05; // x
-    velocities[i * 3 + 1] = Math.random() * 0.1 - 0.05; // y
-    velocities[i * 3 + 2] = Math.random() * 0.1 - 0.05; // z
-  }
-  geometry.setAttribute('position', new BufferAttribute(positions, 3));
-
-  // Matériau des particules (effet de feu d'artifice)
-  const material = new PointsMaterial({
-    color: 0xffa500,  // Orange (peut être modifié pour un autre effet)
-    size: 0.1,       // Taille des particules
-    map: new TextureLoader().load('https://threejs.org/examples/textures/sprites/spark1.png'),
-    blending: AdditiveBlending, // Effet lumineux
-    transparent: true,
-  });
-  
-    // Créer l'objet Points qui représente l'explosion
-    const particles = new Points(geometry, material);
-
-    return { particles, velocities };
-  }
-
-
-
-*/
 
 
 // Main loop
@@ -481,19 +478,39 @@ const init = () => {
 //y = hauteur
 //z = profonderu
 //x = horizontal
-  const onSelect = (event) => {
+const onSelect = (event) => {
 
-    //sperm.position.set(0, 0, -0.3).applyMatrix4(controller.matrixWorld);
-    //sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    //scene.add(sperm);
+  //sperm.position.set(0, 0, -0.3).applyMatrix4(controller.matrixWorld);
+  //sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
+  //scene.add(sperm);
 
-  }
+}
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
   var spermtest = new Mesh(geometryCone, materialCone);
   spermtest.position.set(0,0, -2).applyMatrix4(controller.matrixWorld);
   spermtest.lookAt(center_position);
+  group = new Group();
+  
+  const buttonGeometry = new BoxGeometry(0.3, 0.2, 0.1);
+  const buttonMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
+  buttonMesh = new Mesh(buttonGeometry, buttonMaterial);
+  group.add(buttonMesh);
+  controller1 = renderer.xr.getController(0);
+  scene.add(controller1);
+  const controllerModelFactory = new XRControllerModelFactory();
+  const controllerGrip1 = renderer.xr.getControllerGrip(0);
+  controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
+  scene.add(controllerGrip1);
+  buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
+
+
+
+
+
+
+
   //spermtest.quaternion.setFromRotationMatrix(controller.matrixWorld);
   //spermArr.push([spermtest,0]);
  // scene.add(spermtest);
@@ -518,7 +535,18 @@ const init = () => {
 
  
 init();
+controller1.addEventListener('selectstart', function () {
+  // Utiliser un raycaster pour vérifier l'intersection entre le bouton et le contrôleur
+  tempMatrix.identity().extractRotation(controller1.matrixWorld);
+  raycaster.ray.origin.setFromMatrixPosition(controller1.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
+  const intersects = raycaster.intersectObject(buttonMesh);
+
+  if (intersects.length > 0) {
+    onButtonClick();  // Appeler la fonction de clic si intersection
+  }
+});
 
 
 
