@@ -168,7 +168,7 @@ function spermGenerate(sperm){
     sperm.position.set(x,y ,z).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.rotation.y+=Math.PI/2;
-    if ((x>=2 || x<=2) && z<=1 && z>=-1)
+    if ((x>=2 || x<=2) && z<=0.8 && z>=-0.8)
     {
       if(x>=2)
       {
@@ -180,7 +180,7 @@ function spermGenerate(sperm){
       }
     }
     else{
-      if((z>=2||z<=2)&& x>=1 && x<=1 )
+      if((z>=2||z<=2)&& x>=0.8 && x<=0.8 )
         {
           if(z>=2)
           {
@@ -192,19 +192,19 @@ function spermGenerate(sperm){
           }
         }
         else{
-          if (x>1 && z>1){
+          if (x>0.8 && z>0.8){
             sperm.rotation.y-=2*Math.PI/3;// - 2pi/3
 
           }
-          if(x>1 && z < -1)
+          if(x>0.8 && z < -0.8)
           {
             sperm.rotation.y-=2*Math.PI/3;
           }
-          if(x<-1 && z<-1)
+          if(x<-0.8 && z<-0.8)
           {
             sperm.rotation.y+=Math.PI/3;
           }
-          if(x<-1 && z >1)
+          if(x<-0.8 && z >0.8)
           {
             sperm.rotation.y-=Math.PI/3;
             sperm.rotation.y+=Math.PI;
