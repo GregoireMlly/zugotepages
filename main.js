@@ -162,11 +162,47 @@ function spermGenerate(sperm){
     var sideZ= getRndInteger(-1,1);
     var sideX = getRndInteger(-1,1);
     sperm.scale.set(0.01,0.01,0.01);
-    sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5));//.applyMatrix4(controller.matrixWorld);
+    var x = sideX*getRndInteger(1.2,2.5);
+    var y = getRndInteger(0,2);
+    var z = sideZ*getRndInteger(1.2,2.5);
+    sperm.position.set(x,y ,z).applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
-    sperm.lookAt(camera.position);
+    sperm.rotation.y+=Math.PI/2;
+    if ((x>=2 || x<=2) && z<=1 && z>=-1)
+    {
+      if(x>=2)
+      {
+        sperm.rotation.y+=Math.PI;
+      }
+    }
+    if((z>=2||z<=2)&& x>=1 && x<=1 )
+    {
+      if(z>=2)
+      {
+        sperm.rotation.y-=Math.PI/2;
+      }
+      else{
+        sperm.rotation.y+=Math.PI/2;
+      }
+    }
+    if (x>1 && z>1){
+      sperm.rotation.y-=2*Math.PI/3;
+    }
+    if(x>1 && z < -1)
+    {
+      sperm.rotation.y+=2*Math.PI/3;
+    }
+    if(x<-1 && z<-1)
+    {
+      sperm.rotation.y+=Math.PI/3;
+    }
+    if(x<-1 && z >1)
+    {
+      sperm.rotation.y-=Math.PI/3;
+    }
+    //sperm.lookAt(camera.position);
     
-    //sperm.rotation.y+=Math.PI/2;
+   
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
@@ -454,7 +490,9 @@ const animate = (time) => {
     direction.normalize();  
     direction.multiplyScalar(spermSpeed * delta);
     spermArr[i][0].position.add(direction);
-    spermArr[i][0].lookAt(camera.position);
+    //spermArr[i][0].lookAt(camera.position);
+    //spermArr[i][0].rotation.y+=Math.PI/2;
+    //spermArr[i][0].rotation.x+=Math.PI/2;
   }
   //viseur.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
   //viseur2.position.set(camera.position.x,camera.position.y,camera.position.z-0.1);
