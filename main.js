@@ -136,7 +136,7 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
 var nb_sperm = 25;
-var spermSpeed = 0.05;
+var spermSpeed = 0.055;
 var spermArr = [];
 var BoxArr = [];
 var explosionArr=[];
@@ -148,11 +148,12 @@ let gtlfglobal;
 const explosionDuration = 4;
 let elapsedTime = 0;
 let explosionFinished = false;
+let textMesh;
 
 const clock = new Clock();
 
 var spermatozoide;
-let currentScore = 0;
+let currentScore = 29;
 const fontLoader = new FontLoader();
 let scoreMesh;  // Mesh pour afficher le texte du score
 //get the center of the camera and if the position of the center og the camera is the same as the object then kill it
@@ -333,12 +334,14 @@ function checkHit(time) {
     {
       
       console.log('lost');
-      createEndMessage();
+      createEndMessage("Lost replay ?");
       createReplayButton();
       for(let i = 0;i<spermArr.length;i++)
         {
           scene.remove(spermArr[i][0]);
         }
+        spermArr = [];
+        break;
     }
     spermArr[i][0].rotation.x+=1.5;
   }
@@ -368,7 +371,7 @@ function createScoreText(score) {
     {
       scene.remove(spermArr[i][0]);
     }
-    createEndMessage();
+    createEndMessage("Win Replay ?");
     createReplayButton();
 
   }
@@ -407,15 +410,15 @@ let group;
 
 
 
-function createEndMessage() {
+function createEndMessage(msg) {
   loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const textGeometry = new TextGeometry('Fin Replay ?', {
+    const textGeometry = new TextGeometry(msg, {
       font: font,
       size: 0.7,
       depth: 0.2,
     });
     const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
-    const textMesh = new Mesh(textGeometry, textMaterial);
+    textMesh = new Mesh(textGeometry, textMaterial);
     textMesh.position.set(-2.5, 0.5, -3);  // Centrer le texte
     scene.add(textMesh);
   });
@@ -439,6 +442,8 @@ function onButtonClick() {
     }
   //buttonMesh.material.color.set(0x000000);  // Changer la couleur du bouton pour indiquer le clic
   scene.remove(buttonMesh);
+  scene.remove(textMesh);
+
   //scene.remove(group);
 }
 
