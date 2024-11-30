@@ -323,7 +323,7 @@ function createEndMessage() {
     const textGeometry = new TextGeometry('Fin', {
       font: font,
       size: 1,
-      height: 0.2,
+      depth: 0.2,
     });
     const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
     const textMesh = new Mesh(textGeometry, textMaterial);
@@ -421,6 +421,8 @@ let laserMesh;
 function updateLaser() {
   // Positionner le laser à la position de la caméra
   laserMesh.position.copy(camera.position);
+  laserMesh.position.y-=0.1;
+  //laserMesh.position.z+=0.4;
 
   // Calculer la direction dans laquelle la caméra regarde
   const laserDirection = new Vector3();
@@ -428,10 +430,10 @@ function updateLaser() {
 
   // Positionner l'extrémité du laser dans la direction de la caméra
   const laserEndPosition = new Vector3();
-  laserEndPosition.copy(laserDirection).multiplyScalar(2.5).add(camera.position);
+  laserEndPosition.copy(laserDirection).multiplyScalar(5).add(camera.position);  // Multiplier pour allonger le laser
 
   // Ajuster la position et la rotation du laser pour qu'il pointe dans la bonne direction
-  laserMesh.lookAt(laserEndPosition);
+  laserMesh.lookAt(camera.getWorldDirection(laserDirection));
 }
 // Main loop
 const animate = (time) => {
@@ -524,13 +526,13 @@ const onSelect = (event) => {
   scene.add(controllerGrip1);
   buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
 
-  const laserGeometry = new CylinderGeometry(0.02, 0.02, 5, 32);  // Un cylindre long et fin
+  const laserGeometry = new CylinderGeometry(0.01, 0.01, 5, 32);  // Petit rayon, grande longueur
   const laserMaterial = new MeshBasicMaterial({ color: 0xff0000 });
   laserMesh = new Mesh(laserGeometry, laserMaterial);
-
-  // Rotation du laser pour qu'il soit aligné avec l'axe Z
-  laserMesh.rotation.x = Math.PI / 2;  // Tourne de 90 degrés
-  scene.add(laserMesh);  // Ajoute le laser à la scène
+  laserMesh.side = DoubleSide;
+  // Rotation pour aligner le laser dans l'axe Z
+  laserMesh.rotation.x = Math.PI / 2;  // Aligné avec l'axe de la caméra
+  scene.add(laserMesh);  // Ajouter le laser à la scène
 
 
 
