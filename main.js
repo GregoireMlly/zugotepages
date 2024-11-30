@@ -135,8 +135,8 @@ const geometryCone = new CylinderGeometry(0, 0.05, 0.2, 32).rotateX(Math.PI / 2)
 
 const materialCone = new MeshPhongMaterial({ color: 0xffffff * Math.random() });
 const raycaster = new Raycaster();
-var nb_sperm = 20;
-var spermSpeed =0.04;
+var nb_sperm = 25;
+var spermSpeed = 0.05;
 var spermArr = [];
 var BoxArr = [];
 var explosionArr=[];
@@ -223,7 +223,7 @@ function spermGenerate(sperm){
    
     sperm.traverse(function(child) {
       if (child.isMesh) {
-          child.material = new MeshPhongMaterial({ color: 0x000000 });
+          child.material = new MeshPhongMaterial({ color: 0xffffff });
           child.material.side = DoubleSide;
           }});
     scene.add(sperm);
@@ -340,6 +340,7 @@ function checkHit(time) {
           scene.remove(spermArr[i][0]);
         }
     }
+    spermArr[i][0].rotation.z+=1.5;
   }
   /*
   // Raycast from the controller position and direction
@@ -576,14 +577,14 @@ const init = () => {
   camera.position.set(0, 0, 0);
   center_position = camera.position;
 
-  const sunlight = new DirectionalLight(0xffffff, 1);
+  const sunlight = new DirectionalLight(0xffffff, 10);
   scene.add(sunlight);
   sunlight.position.set(5, 5, 5);  // Position de la lumière (comme un soleil lointain)
   sunlight.castShadow = true;
-/*
+
   const hemiLight = new HemisphereLight(0xffffff, 0xbbbbff, 3);
   hemiLight.position.set(0.5, 1, 0.25);
-  scene.add(hemiLight);*/
+  //scene.add(hemiLight);
 
   renderer = new WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
