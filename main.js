@@ -165,7 +165,8 @@ function spermGenerate(sperm){
     sperm.position.set(sideX*getRndInteger(1.2,2.5),getRndInteger(-1,2) , sideZ*getRndInteger(1.2,2.5));//.applyMatrix4(controller.matrixWorld);
     sperm.quaternion.setFromRotationMatrix(controller.matrixWorld);
     sperm.lookAt(center_position);
-    //sperm.rotation.y-=Math.PI/3;
+    
+    sperm.rotation.z+=Math.PI/2;
     sperm.traverse(function(child) {
       if (child.isMesh) {
           child.material = new MeshPhongMaterial({ color: 0x000000 });
