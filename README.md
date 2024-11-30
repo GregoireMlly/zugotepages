@@ -13,3 +13,8 @@ Difficultées:
   - explosion lors des kills de spermatozoides.
 
 lien pour tester: gregoiremlly.github.io/zugotepages/
+
+
+![Screenshot_20241130_223451_Samsung_Internet](https://github.com/user-attachments/assets/fd2eb44b-6bf0-41d4-a8d3-011e90c1a110)
+![Screenshot_20241130_223506_Samsung_Internet](https://github.com/user-attachments/assets/d1cfe36f-fe4c-4863-a753-b34a6143dbb2)
+![Screenshot_20241130_223530_Samsung_Internet](https://github.com/user-attachments/assets/0a5dd06e-a823-4443-b124-57d50ba11fdf)
