@@ -175,31 +175,37 @@ function spermGenerate(sperm){
         sperm.rotation.y+=Math.PI;
       }
     }
-    if((z>=2||z<=2)&& x>=1 && x<=1 )
-    {
-      if(z>=2)
-      {
-        sperm.rotation.y-=Math.PI/2;
-      }
-      else{
-        sperm.rotation.y+=Math.PI/2;
-      }
+    else{
+      if((z>=2||z<=2)&& x>=1 && x<=1 )
+        {
+          if(z>=2)
+          {
+            sperm.rotation.y+=Math.PI/2;
+          }
+          else{
+            sperm.rotation.y-=Math.PI/2;
+          }
+        }
+        else{
+          if (x>1 && z>1){
+            //sperm.rotation.y+=Math.PI/3;// - 2pi/3
+          }
+          if(x>1 && z < -1)
+          {
+            sperm.rotation.y-=2*Math.PI/3;
+          }
+          if(x<-1 && z<-1)
+          {
+            sperm.rotation.y+=Math.PI/3;
+          }
+          if(x<-1 && z >1)
+          {
+            sperm.rotation.y-=Math.PI/3;
+          }
+        }
+        
     }
-    if (x>1 && z>1){
-      sperm.rotation.y-=2*Math.PI/3;
-    }
-    if(x>1 && z < -1)
-    {
-      sperm.rotation.y+=2*Math.PI/3;
-    }
-    if(x<-1 && z<-1)
-    {
-      sperm.rotation.y+=Math.PI/3;
-    }
-    if(x<-1 && z >1)
-    {
-      sperm.rotation.y-=Math.PI/3;
-    }
+    
     //sperm.lookAt(camera.position);
     
    
