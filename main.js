@@ -327,7 +327,7 @@ function createEndMessage() {
     });
     const textMaterial = new MeshBasicMaterial({ color: 0xff0000 });
     const textMesh = new Mesh(textGeometry, textMaterial);
-    textMesh.position.set(-1, 1.5, -3);  // Centrer le texte
+    textMesh.position.set(-2, 1.2, -3);  // Centrer le texte
     scene.add(textMesh);
   });
 }
@@ -413,13 +413,32 @@ function ExplodeAnimation(x, y, z) {
 }
 //croix-
 
+//laser
+let laserMesh;
 
 
+// Fonction pour mettre à jour la position et la direction du laser
+function updateLaser() {
+  // Positionner le laser à la position de la caméra
+  laserMesh.position.copy(camera.position);
+
+  // Calculer la direction dans laquelle la caméra regarde
+  const laserDirection = new Vector3();
+  camera.getWorldDirection(laserDirection);
+
+  // Positionner l'extrémité du laser dans la direction de la caméra
+  const laserEndPosition = new Vector3();
+  laserEndPosition.copy(laserDirection).multiplyScalar(2.5).add(camera.position);
+
+  // Ajuster la position et la rotation du laser pour qu'il pointe dans la bonne direction
+  laserMesh.lookAt(laserEndPosition);
+}
 // Main loop
 const animate = (time) => {
   //console.log(camera.getWorldDirection(cameraVector));
   const delta = clock.getDelta();
   const elapsed = clock.getElapsedTime();
+  updateLaser();
   checkHit(time);
   // can be used in shaders: uniforms.u_time.value = elapsed;
   for (let i = 0; i < spermArr.length; i++) {
@@ -505,7 +524,13 @@ const onSelect = (event) => {
   scene.add(controllerGrip1);
   buttonMesh.position.set(0, 1, -1);  // Positionner sous le texte
 
+  const laserGeometry = new CylinderGeometry(0.02, 0.02, 5, 32);  // Un cylindre long et fin
+  const laserMaterial = new MeshBasicMaterial({ color: 0xff0000 });
+  laserMesh = new Mesh(laserGeometry, laserMaterial);
 
+  // Rotation du laser pour qu'il soit aligné avec l'axe Z
+  laserMesh.rotation.x = Math.PI / 2;  // Tourne de 90 degrés
+  scene.add(laserMesh);  // Ajoute le laser à la scène
 
 
 
